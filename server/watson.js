@@ -2,6 +2,12 @@ const watson = require('watson-developer-cloud')
 const mqtt = require('mqtt')
 const mqttClient = mqtt.createClient(1883, 'iot.eclipse.org')
 
+const speech_to_text = watson.speech_to_text({
+    username: 'c8090707-bcda-49e0-98f9-172c40420c1a',
+    password: 'cZGWayUpvsSJ',
+    version: 'v1'
+})
+
 const ConversationV1 = require('watson-developer-cloud/conversation/v1') // watson sdk
 // Create the service wrapper
 const conversation = new ConversationV1({
@@ -27,11 +33,6 @@ iot_client.on('connect', function() {
 })
 iot_client.subscribe('iot-2/cmd/+/fmt/+', function(err, granted) {
     console.log('subscribed command, granted: '+ JSON.stringify(granted))
-})
-const speech_to_text = watson.speech_to_text({
-    username: 'c8090707-bcda-49e0-98f9-172c40420c1a',
-    password: 'cZGWayUpvsSJ',
-    version: 'v1'
 })
 
 module.exports = { iot_client, speech_to_text }

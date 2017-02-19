@@ -1,6 +1,8 @@
-const exec 
+const { exec } = require('child-process')
+const iconv = require('iconv')
 
-module.exports = textInput => {
+module.exports = bot => textInput => {
+    const buf = iconv.encode(textInput, 'UTF8')
     const child = exec(
         'java -Dfile.encoding=UTF-8 -jar c:/iflytek/iflytek.jar \"'+textInput+'\"',{encoding: 'utf8'});
     child.stdout.on('data', function(data) {

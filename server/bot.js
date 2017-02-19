@@ -1,10 +1,48 @@
 const md5 = require('md5')
 const { iot_client } = require('./config')
 const events = require('events')
+const iconv = require('iconv')
+
 
 let conversations = {}
 const bot = new event()
-const rc = rc(bot)
+const runRc = rc(bot)
+micInput(bot)
+watsonInput(bot)
+
+const execute = (task, data) => {
+    switch (task) {
+        case 'rc':
+            const conversation = data
+            runRc(conversation.question)
+            break;
+        case 'create_wav':
+            const { rc, watson } = data.reply
+            if (rc.hasAnswer) {
+                createWAV(rc.text)
+                if (watson.hasAnswer)
+                    createWAV(watson.text)
+            } else createWAV(watson.text)
+    }
+}
+
+const send = (to, data) {
+    switch (to) {
+        case 'watson':
+            const payload = {d:{
+                "mid": data.id,
+                "text": iconv.encode(data.question, 'UTF8').toString() || {},
+                "eventId": '',
+                "eventUser": ''
+            }}
+            iot_client.publish(
+                'iot-2/evt/text/fmt/json',
+                JSON.stringify(payload)
+            )
+            break;
+        default:
+    }
+}
 
 bot.on('queston', (data) => {
     const id = md5(data+time.toString())
@@ -13,41 +51,23 @@ bot.on('queston', (data) => {
         question: data,
         reply: {}
     }
-    this.execute('rc', conversation)
-    this.send('watson', conversation)
+    execute('rc', conversation)
+    send('watson', conversation)
 })
 bot.on('rc', (id, text) => {
-    conversation[id].reply.rc = text
+    conversation[id].reply.rc = {
+        text: text,
+        hasAnswer: text !== ''
+    }
     if( conversation[id].reply.watson )
-        this.execute('create_wav', conversation[id])
+        execute('create_wav', conversation[id])
 })
-class bot extends events {
-    constructor (emitter) {
-        this.emitter = emitter
-        this.rc = rc(emitter)
-        micInput(emitter)
+bot.on('watson', (id, hasAnswer, text) => {
+    conversation[id].reply.watson = {
+        text, hasAnswer
     }
-    receive (from, data) {
-        //debug.receive(from, data)
-        this.emit(from, data)
-    }
-    send (to, data) {
-        switch (to) {
-            case 'watson':
-                const payload = {d:{
-                    "mid": data.id,
-                    "text": buf.toString() || {},
-                    "eventId": '',
-                    "eventUser": ''
-                }}
-                iot_client.publish(
-                    'iot-2/evt/text/fmt/json',
-                    JSON.stringify(payload)
-                )
-                break;
-            default:
-        }
-    }
+    if( conversation[id].reply.rc )
+        execute('create_wav', conversation[id])
+})
 
-
-}
+module.exports = bot
