@@ -5,24 +5,30 @@ const iconv = require('iconv')
 
 
 let conversations = {}
-const bot = new event()
+class botEvents extends events{}
+const bot = new botEvents()
 const runRc = rc(bot)
 micInput(bot)
 watsonInput(bot)
+
+const createWAV = (id, text) => {
+
+}
 
 const execute = (task, data) => {
     switch (task) {
         case 'rc':
             const conversation = data
+            const id = conversation.id
             runRc(conversation.question)
             break;
         case 'create_wav':
             const { rc, watson } = data.reply
             if (rc.hasAnswer) {
-                createWAV(rc.text)
+                createWAV(id, rc.text)
                 if (watson.hasAnswer)
-                    createWAV(watson.text)
-            } else createWAV(watson.text)
+                    createWAV(id, watson.text)
+            } else createWAV(id, watson.text)
     }
 }
 
