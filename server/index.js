@@ -3,7 +3,7 @@
 const http = require('http')
 const path = require('path')
 const express = require('express')
-const fbbot = require('messenger-bot')
+//const fbbot = require('messenger-bot')
 const botly = require('botly')
 
 const { normalizePort, onError, onListening } = require('./util')
@@ -16,16 +16,41 @@ const port = normalizePort( process.env.PORT || PORT )
 app.set( 'port', port )
 app.use( express.static( path.join( __dirname, '..', 'public' ) ) )
 
+const iot = require('./iot')
+//const users = require('./users')
+
 const bot = new botly({
     verifyToken: "verification",
-    accessToken: "EAAJ1qMtnld8BAFfoNmK8cNWdZC1smVKB8DknlENZADZAUlhG0ZButwJC9oqVPj8Jz6DOJbvBLxOQBZANBHz1TML3lomI6bsIegA7LUvLeQlRmT7OxOi9t7yitEw8IFQBnudDBp8sLFnOK9ydZBzOprxQCEu0Jejcg84excAh1BNQZDZD"
+    accessToken: "EAAJ1qMtnld8BAI52ZBPcOPppkdRUkCB6rZCbeIayhnpNsWltaBQkcGVay0rHhgBA7oXEjD1RfbdHrZAUDZAH6hZCNc4CY1SiJ9m5JJyNTgEVIuE05vHzACJ9JpHLNy2ZCHnC66hOQlRUujBXjb6oBFuG94TaztRPUiOwCTYdD9ZCQZDZD"
 })
+const send = require('./fbSend')(bot)
+
+iot.on('message', (t, bufferP) => {
+    console.log('receive iot payload')
+    const payload = JSON.parse(bufferP)
+    console.log('topic:', t,'payload:',payload)
+    switch (payload.type) {
+        case 'movie':
+        default:
+            send.movie(payload)
+    }
+})
+
+
 bot.on('message', (sender, message, data) => {
 	console.log('receive log', sender, message, data)
+    iot.publish('iot-2/evt/movie/fmt/json',
+        JSON.stringify({
+            sender: sender,
+            mid: message.mid,
+            type: 'text',
+            data: data.text
+        })
+    )
 	bot.send({
 		id: sender,
 		message:{
-			text: 'loolol'	
+			text: 'loolol'
 		}
 	}, (err, data) => {
 		if (err) console.log('err:', err)
