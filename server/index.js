@@ -29,17 +29,13 @@ iot.on('message', (t, bufferP) => {
     console.log('receive iot payload')
     const payload = JSON.parse(bufferP)
     console.log('topic:', t,'payload:',payload)
-    switch (payload.type) {
-        case 'movie':
-        default:
-            send.movie(payload)
-    }
+    send(payload)
 })
 
 
 bot.on('message', (sender, message, data) => {
-	console.log('receive log', sender, message, data)
-    iot.publish('iot-2/evt/movie/fmt/json',
+	console.log('receive message', sender, message, data)
+    iot.publish('iot-2/evt/restaurant/fmt/json',
         JSON.stringify({
             sender: sender,
             mid: message.mid,
@@ -57,6 +53,11 @@ bot.on('message', (sender, message, data) => {
 		else console.log('msg sent:', data)
 	})
 })
+bot.on('postback', (sender, message,payload) => {
+    console.log('receive postback:', sender, message, payload)
+})
+
+
 
 app.use('/fbwebhook', bot.router())
 /*let bot = new fbbot({
