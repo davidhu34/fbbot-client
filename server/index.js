@@ -53,8 +53,9 @@ bot.on('message', (sender, message, data) => {
 		else console.log('msg sent:', data)
 	})
 })
-bot.on('postback', (sender, message,payload) => {
+bot.on('postback', (sender, message, payload) => {
     console.log('receive postback:', sender, message, payload)
+    send(payload)
 })
 
 

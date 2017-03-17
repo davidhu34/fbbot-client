@@ -26,19 +26,18 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
             botly.sendGeneric({
                 id: prev.sender,
                 elements: elements
-            }, (err, data) => {console.log("send generic cb:", err, data)} )
-            break;
+            }, (err, data) => {console.log("send movies cb:", err, data)} )
+            break
         case 'restaurant':
             data.restaurants.map( r => {
-                console.log(Object.keys(r))
-                const open = (r.opening_hours)? (
-                    (r.opening_hours.open_now)? '營業中': '今日已結束營業'
+                const open = (r.opening_hours !== undefined)? (
+                    (r.opening_hours.open_now)? ' | 營業中': ' | 今日已結束營業'
                 ) : ''
                 if(elements.length < 4)
                     elements.push({
                         title: r.name,
                         //"image_url": "",
-                        subtitle: r.formatted_address+' | '+open,
+                        subtitle: r.formatted_address+open,
                         buttons: [
                             {
                                 title: r.rating,
@@ -54,15 +53,63 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                 payload: {
                     template_type: 'list',
                     top_element_style: 'compact',
-                    elements: elements
+                    elements: elements,
+                    buttons: [{
+                        title: 'View More',
+                        type: 'postback',
+                        payload: 'payload'
+                    }]
+                }
+            }, (err, data) => {console.log("send restaurants cb:", err, data)} )
+            break
+        case 'review':
+            console.log('to send reviews')
+            const open = (data.open !== undefined)? (
+                data.open? ' | 營業中': ' | 今日已結束營業'
+            ) : ''
+            const top = {
+                title: data.name,
+                subtitle: '地址: '+data.address+' | 電話: '+data.phone+' | 網址: '+data.website,
+                default_action: {
+                    type: 'web_url',
+                    url: data.website,
                 },
                 buttons: [{
-                    title: 'View More',
-                    type: 'postback',
-                    payload: 'payload'
+                    type: 'web_url',
+                    title: data.rating+open,
+                    url: data.google
                 }]
-            }, (err, data) => {console.log("send generic cb:", err, data)} )
-
+            }
+            elements.push(top)
+            data.reviews.map( rv => {
+                if(elements.length < 4)
+                    elements.push({
+                        title: rv.rating,
+                        //"image_url": "",
+                        subtitle: rv.text,
+                    })
+            })
+            botly.send({
+                id: prev.sender,
+                message: {
+                    text: '供您參考最高評價選項'
+                }
+            }, () => {
+                botly.sendAttachment({
+                    id: prev.sender,
+                    type: 'template',
+                    payload: {
+                        template_type: 'list',
+                        top_element_style: 'compact',
+                        elements: elements,
+                        buttons: [{
+                            title: 'View More',
+                            type: 'postback',
+                            payload: 'payload'
+                        }]
+                    }
+                }, (err, data) => {console.log("send recviews cb:", err, data)} )
+            })
         default:
     }
 }
