@@ -1,7 +1,8 @@
 const opencc = require('opencc')
 const occ = new opencc('s2twp.json')
 const type_zh_tw = require('./place_type')
-
+const stockname = require('./stockname.json')
+//const stockName = JSON.parse(stockname)
 const chzw = str => occ.convertSync(str)
 
 module.exports = (botly) => (payload) => { // source: douban movies v2 api
@@ -10,6 +11,33 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
     const data = payload.data
     const elements = []
     switch (type) {
+        case 'stock':
+            const stockCode = data.stock.split(':')
+            console.log(stockCode)
+            const name = stockCode[0] === 'TPE'? stockname[stockCode[1]] : data.stock
+            const l = data.info.l
+            const c = data.info.c
+            elements.push({
+                //image_url: data.graphUrl,
+                title: name,
+                subtitle: l+' | '+c+' ('+Math.round(10000*c/l)/100+'%)',
+                buttons: [{
+                    type: 'web_url',
+                    title: 'details',
+                    url: 'https://www.google.com/finance?cid='+data.info.id
+                }]
+            })
+            botly.sendImage({
+                id: prev.sender,
+                url: data.graphUrl
+            }, (err, data) => {
+                console.log("stock img cb:", err, data)
+                botly.sendGeneric({
+                    id: prev.sender,
+                    elements: elements
+                }, (err, data) => { console.log("stock gen. cb:", err, data)})
+            })
+            break
         case 'travel':
             data.places.map( p => {
                 const placeType = p.types
@@ -31,7 +59,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
             botly.sendGeneric({
                 id: prev.sender,
                 elements: elements,
-            }, (err, data) => {console.log("send travel cb:", err, data)} )
+            }, (err, data) => { console.log("travel cb:", err, data) })
             break
         case 'movie':
             data.movies.map( m => {
@@ -49,7 +77,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
             botly.sendGeneric({
                 id: prev.sender,
                 elements: elements
-            }, (err, data) => {console.log("send movies cb:", err, data)} )
+            }, (err, data) => { console.log("movies cb:", err, data) })
             break
         case 'restaurant':
             data.restaurants.map( r => {
@@ -83,7 +111,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                         payload: 'payload'
                     }]
                 }
-            }, (err, data) => {console.log("send restaurants cb:", err, data)} )
+            }, (err, data) => { console.log("restaurants cb:", err, data) })
             break
         case 'review':
             console.log('to send reviews')
@@ -117,7 +145,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                 message: {
                     text: '供您參考最高評價選項'
                 }
-            }, () => {
+            }, (err, data) => {
                 botly.sendAttachment({
                     id: prev.sender,
                     type: 'template',
@@ -131,7 +159,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                             payload: 'payload'
                         }]
                     }
-                }, (err, data) => {console.log("send recviews cb:", err, data)} )
+                }, (err, data) => { console.log("reviews list cb:", err, data) })
                 botly.sendButtons({
                     id: prev.sender,
                     text: (data.name+'...'+data.reviews[0].text).slice(0,640),
@@ -144,7 +172,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                         url: data.google,
                         title: 'open map'
                     }]
-                }, (err, data) => {console.log("send recviews button cb:", err, data)} )
+                }, (err, data) => { console.log("reviews button cb:", err, data) })
             })
         default:
     }
