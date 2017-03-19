@@ -14,13 +14,14 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
         case 'stock':
             const stockCode = data.stock.split(':')
             console.log(stockCode)
-            const name = stockCode[0] === 'TPE'? stockname[stockCode[1]] : data.stock
+            const name = stockCode[0] === 'TPE'? stockname[stockCode[1]]
+                : data.name
             const l = data.info.l
             const c = data.info.c
             elements.push({
                 //image_url: data.graphUrl,
-                title: name,
-                subtitle: l+' | '+c+' ('+Math.round(10000*c/l)/100+'%)',
+                title: l+' | '+c+' ('+Math.round(10000*c/l)/100+'%)',
+                subtitle: name,
                 buttons: [{
                     type: 'web_url',
                     title: 'details',
