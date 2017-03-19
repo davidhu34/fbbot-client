@@ -1,5 +1,6 @@
 const opencc = require('opencc')
 const occ = new opencc('s2twp.json')
+const type_zh_tw = require('./place_type')
 
 const chzw = str => occ.convertSync(str)
 
@@ -9,8 +10,30 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
     const data = payload.data
     const elements = []
     switch (type) {
+        case 'travel':
+            data.places.map( p => {
+                const placeType = p.types
+                    .map(t => type_zh_tw[t])
+                    .join('/')
+                console.log(placeType)
+                elements.push({
+                    image_url: p.photoUrl,
+                    title: p.name,
+                    subtitle: placeType+" | "+p.address,
+                    item_url: "https://www.google.com.tw/search?q="+(p.name),
+                    buttons: [{
+                        type: 'web_url',
+                        title: 'map',
+                        url: 'http://maps.google.com.tw/maps?z=12&t=m&q=loc:'+p.location.lat+'+'+p.location.lng
+                    }]
+                })
+            })
+            botly.sendGeneric({
+                id: prev.sender,
+                elements: elements,
+            }, (err, data) => {console.log("send travel cb:", err, data)} )
+            break
         case 'movie':
-            console.log(data.movies[0])
             data.movies.map( m => {
                 const genre = chzw(m.genres.join('/'))
                 const cast = chzw(m.casts.map( m => m.name ).join())

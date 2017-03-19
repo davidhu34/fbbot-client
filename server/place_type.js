@@ -1,4 +1,4 @@
-const TYPE_ZH_TW = {
+module.exports = {
 	accounting: '會計',
 	airport: '機場',
 	amusement_park: '遊樂園',
