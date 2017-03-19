@@ -107,8 +107,8 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
             data.reviews.map( rv => {
                 if(elements.length < 4)
                     elements.push({
-                        title: rv.rating+" / 5.0",
                         //"image_url": "",
+                        title: rv.rating+" / 5.0",
                         subtitle: rv.text,
                     })
             })
@@ -132,6 +132,19 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                         }]
                     }
                 }, (err, data) => {console.log("send recviews cb:", err, data)} )
+                botly.sendButtons({
+                    id: prev.sender,
+                    text: (data.name+'...'+data.reviews[0].text).slice(0,640),
+                    buttons:[{
+                        type: 'web_url',
+                        url: data.website,
+                        title: 'go to website'
+                    },{
+                        type: 'web_url',
+                        url: data.google,
+                        title: 'open map'
+                    }]
+                }, (err, data) => {console.log("send recviews button cb:", err, data)} )
             })
         default:
     }
