@@ -35,7 +35,7 @@ iot.on('message', (t, bufferP) => {
 
 bot.on('message', (sender, message, data) => {
 	console.log('receive message', sender, message, data)
-    iot.publish('iot-2/evt/stock/fmt/json',
+    iot.publish('iot-2/evt/weather/fmt/json',
         JSON.stringify({
             sender: sender,
             mid: message.mid,

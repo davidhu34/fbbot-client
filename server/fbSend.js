@@ -11,6 +11,12 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
     const data = payload.data
     const elements = []
     switch (type) {
+        case 'weather':
+            botly.sendImage({
+                id: prev.sender,
+                url: 'http://i.imgur.com/HBzoozp.gif'
+            }, (err, data) => { console.log('weather cb:', err, data) })
+            break
         case 'stock':
             const stockCode = data.stock.split(':')
             console.log(stockCode)
