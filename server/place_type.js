@@ -32,7 +32,7 @@ module.exports = {
 	electrician: '電工',
 	electronics_store: '電子商店',
 	embassy: '大使館',
-	establishment: '機構',
+	establishment: '建築',
 	finance: '金融',
 	fire_station: '消防站',
 	florist: '花店',
@@ -94,5 +94,6 @@ module.exports = {
 	travel_agency: '旅行社',
 	university: '大學',
 	veterinary_store: '獸醫商店',
+	//point_of_interest: '景點',
 	zoo: '動物園'
 }

@@ -13,13 +13,13 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
         case 'travel':
             data.places.map( p => {
                 const placeType = p.types
-                    .map(t => type_zh_tw[t])
-                    .join('/')
+                    .filter( t => t !== 'point_of_interest' )
+                    .map(t => type_zh_tw[t]).join('/')
                 console.log(placeType)
                 elements.push({
                     image_url: p.photoUrl,
-                    title: p.name,
-                    subtitle: placeType+" | "+p.address,
+                    title: chzw(p.name),
+                    subtitle: p.rating+" | "+placeType+" | "+chzw(p.address),
                     item_url: "https://www.google.com.tw/search?q="+(p.name),
                     buttons: [{
                         type: 'web_url',
@@ -63,7 +63,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                         subtitle: r.formatted_address+open,
                         buttons: [
                             {
-                                title: r.rating,
+                                title: r.rating+" / 5.0",
                                 type: 'postback',
                                 payload: 'fsdg'
                             }
@@ -99,7 +99,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
                 },
                 buttons: [{
                     type: 'web_url',
-                    title: data.rating+open,
+                    title: data.rating+open+" | open map",
                     url: data.google
                 }]
             }
@@ -107,7 +107,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
             data.reviews.map( rv => {
                 if(elements.length < 4)
                     elements.push({
-                        title: rv.rating,
+                        title: rv.rating+" / 5.0",
                         //"image_url": "",
                         subtitle: rv.text,
                     })
