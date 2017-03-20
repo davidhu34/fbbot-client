@@ -57,9 +57,21 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 			}, (err, data) => { console.log("news cb:", err, data) })
 			break
 		case 'weather':
-			botly.sendImage({
+			const w = data.weather
+			elements.push({
+				image_url: w.imageUrl,
+				title: w.name+' - '+w.time,
+				subtitle: w.narrative+" "+w.lunar,
+				buttons: [{
+					type: 'web_url',
+					title: 'google',
+					url: 'https://www.google.com'
+				}]
+			})
+			botly.sendGeneric({
 				id: prev.sender,
-				url: 'http://i.imgur.com/HBzoozp.gif'
+				aspectRatio: 'square',
+				elements: elements
 			}, (err, data) => { console.log('weather cb:', err, data) })
 			break
 		case 'stock':
