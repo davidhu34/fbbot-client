@@ -30,13 +30,13 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 					const titleSeg = n.title.split(' - ')
 					const publisher = (titleSeg[1])? titleSeg[1]+' | ': ''
 					elements.push({
+						image_url: n.imageUrl,
 						title: titleSeg[0],
 						subtitle: publisher+n.time+' | '+n.category,
 						buttons: [{
 							type: 'web_url',
 							title: 'open link',
 							url: n.link
-
 						}]
 					})
 				}
