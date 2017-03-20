@@ -1,9 +1,21 @@
+const request = require('request')
 const opencc = require('opencc')
 const occ = new opencc('s2twp.json')
 const type_zh_tw = require('./place_type')
 const stockname = require('./stockname.json')
 //const stockName = JSON.parse(stockname)
 const chzw = str => occ.convertSync(str)
+
+const get = url => {
+	const cb = (err, res, body)=>{
+		console.log('request:',url)
+		console.log('err:', err)
+		console.log('res:', res)
+		console.log('body:', body)
+		return body
+	}
+	request(url, cb)
+}
 
 module.exports = (botly) => (payload) => { // source: douban movies v2 api
 	const type = payload.type
@@ -114,6 +126,18 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 					item_url: "https://www.google.com.tw/search?q="+(m.original_title+'+'+m.year).replace(" ",'+')//m.alt
 				})
 			})
+			request('https://api.douban.com/v2/movie/subject/'+data.movies[0].id,
+				(err, res, body) => {
+					console	.log('request:',data.movies[0].id)
+					console.log('err:', err)
+					console.log('res:', res)
+					const summary = chzw(JSON.parse(body).summary).substr(0,600)
+					botly.sendText({
+						id: prev.sender,
+						text: '推薦新上映: '+summary
+					})
+				}
+			)
 			botly.sendGeneric({
 				id: prev.sender,
 				elements: elements
