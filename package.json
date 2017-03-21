@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon server",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "es5server": "babel server --out-dir serverES5",
     "dev": "nodemon -w server --exec 'babel-node server --presets es2015,stage-0'"
   },
   "author": "",

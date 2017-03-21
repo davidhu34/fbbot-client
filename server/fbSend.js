@@ -221,7 +221,7 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 				message: {
 					text: '供您參考最高評價選項'
 				}
-			}, (err, data) => {
+			}, (err, d) => {
 				botly.sendAttachment({
 					id: prev.sender,
 					type: 'template',
@@ -236,20 +236,29 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 						}]
 					}
 				}, (err, data) => { console.log("reviews list cb:", err, data) })
-				botly.sendButtons({
-					id: prev.sender,
-					text: (data.name+'...'+data.reviews[0].text).slice(0,640),
-					buttons:[{
+				const buttons = []
+				if(data.website) buttons.push({
 						type: 'web_url',
 						url: data.website,
 						title: 'go to website'
-					},{
+					})
+				if(data.google) buttons.push({
 						type: 'web_url',
 						url: data.google,
 						title: 'open map'
-					}]
+					})
+				botly.sendButtons({
+					id: prev.sender,
+					text: (data.name+'...'+data.reviews[0].text).slice(0,640),
+					buttons:buttons
 				}, (err, data) => { console.log("reviews button cb:", err, data) })
 			})
+			break
+		case 'text':
 		default:
+			botly.send({
+				id: prev.sender,
+				message:{text: data.text}
+			}, (err, data) => { console.log('text send cb:', err, data) })
 	}
 }
