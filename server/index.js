@@ -24,6 +24,7 @@ const bot = new botly({
     accessToken: "EAAJ1qMtnld8BAI52ZBPcOPppkdRUkCB6rZCbeIayhnpNsWltaBQkcGVay0rHhgBA7oXEjD1RfbdHrZAUDZAH6hZCNc4CY1SiJ9m5JJyNTgEVIuE05vHzACJ9JpHLNy2ZCHnC66hOQlRUujBXjb6oBFuG94TaztRPUiOwCTYdD9ZCQZDZD"
 })
 const send = require('./fbSend')(bot)
+const users = {}
 
 iot.on('message', (t, bufferP) => {
     console.log('receive iot payload')
@@ -32,8 +33,7 @@ iot.on('message', (t, bufferP) => {
     send(payload)
 })
 
-
-bot.on('message', (sender, message, data) => {
+const reply = (sender, message, data) => {
 	console.log('receive message', sender, message, data)
     iot.publish('iot-2/evt/news/fmt/json',
         JSON.stringify({
@@ -52,6 +52,23 @@ bot.on('message', (sender, message, data) => {
 		if (err) console.log('err:', err)
 		else console.log('msg sent:', data)
 	})
+}
+bot.on('message', (sender, message, data) => {
+	const userProfile = new Promise( (resolve, reject) => {
+		if(!user[sender]) {
+			botly.getUserProfile( sender, (err, info) => {
+				users[sender] = info
+				resolve([sender, message, data])
+				botly.sendText({
+					id: sender, 
+					text: 'Hello~'+info.first_name
+				}, (err, d) => { console.log('user profile greeting:',d) })
+			})
+		} else resolve([sender, message, data])
+	})
+	userProfile.then( par => {
+		reply(par[0], par[1], par[2])
+	}).catch( err => { console.log('profile promise err:', err) })
 })
 bot.on('postback', (sender, message, payload) => {
     console.log('receive postback:', sender, message, payload)

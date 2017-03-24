@@ -65,11 +65,11 @@ module.exports = botly => payload => {
 				image_url: w.imageUrl,
 				title: w.name + ' - ' + w.time,
 				subtitle: w.narrative + " " + w.lunar,
-				buttons: [{
+				/*buttons: [{
 					type: 'web_url',
 					title: 'google',
 					url: 'https://www.google.com'
-				}]
+				}]*/
 			});
 			botly.sendGeneric({
 				id: prev.sender,
@@ -82,7 +82,10 @@ module.exports = botly => payload => {
 		case 'stock':
 			const stockCode = data.stock.split(':');
 			console.log(stockCode);
-			const name = stockCode[0] === 'TPE' ? stockname[stockCode[1]] : data.name;
+			const tpe = stockCode[0] === 'TPE';
+			const name = tpe? stockname[stockCode[1]] : data.name;
+			const url = tpe? 'http://www.masterlink.com.tw/stock/individual/individualIndex.aspx?stockId='+stockCode[1]
+				:'https://www.google.com/finance?cid=' + data.info.id;
 			const l = data.info.l;
 			const c = data.info.c;
 			elements.push({
@@ -91,8 +94,8 @@ module.exports = botly => payload => {
 				subtitle: name,
 				buttons: [{
 					type: 'web_url',
-					title: 'details',
-					url: 'https://www.google.com/finance?cid=' + data.info.id
+					title: '下單',
+					url: url
 				}]
 			});
 			botly.sendImage({
@@ -115,7 +118,7 @@ module.exports = botly => payload => {
 				elements.push({
 					image_url: p.photoUrl,
 					title: chzw(p.name),
-					subtitle: p.rating + " | " + placeType + " | " + chzw(p.address),
+					subtitle: (p.rating? p.rating + ' | ':'')+ placeType + " | " + chzw(p.address),
 					item_url: "https://www.google.com.tw/search?q=" + p.name,
 					buttons: [{
 						type: 'web_url',
@@ -192,6 +195,7 @@ module.exports = botly => payload => {
 			});
 			break;
 		case 'review':
+			//if (data.reviews.length > 0) {
 			console.log('to send reviews');
 			const open = data.open !== undefined ? data.open ? ' | 營業中' : ' | 今日已結束營業' : '';
 			const top = {
@@ -214,14 +218,14 @@ module.exports = botly => payload => {
 					title: rv.rating + " / 5.0",
 					subtitle: rv.text
 				});
-			});
+			});		
 			botly.send({
 				id: prev.sender,
 				message: {
 					text: '供您參考最高評價選項'
 				}
-			}, (err, data) => {
-				botly.sendAttachment({
+			}, (err, d) => {
+				/*botly.sendAttachment({
 					id: prev.sender,
 					type: 'template',
 					payload: {
@@ -236,31 +240,44 @@ module.exports = botly => payload => {
 					}
 				}, (err, data) => {
 					console.log("reviews list cb:", err, data);
-				});
-				botly.sendButtons({
-					id: prev.sender,
-					text: (data.name + '...' + data.reviews[0].text).slice(0, 640),
-					buttons: [{
+				});*/
+				const buttons = [];
+				if(data.website)
+					buttons.push({
 						type: 'web_url',
 						url: data.website,
 						title: 'go to website'
-					}, {
+					});
+				if(data.google)
+					buttons.push({
 						type: 'web_url',
 						url: data.google,
 						title: 'open map'
-					}]
+					});
+				botly.sendButtons({
+					id: prev.sender,
+					text: (data.name + '...' + data.reviews[0].text).slice(0, 640),
+					buttons: buttons
 				}, (err, data) => {
 					console.log("reviews button cb:", err, data);
 				});
+			});//}
+			break;
+		case 'hsr':
+			botly.sendText({
+				id: prev.sender,
+				text: chzw(data.hsr)
+			}, (err, data) => {
+				console.log('hsr table text send cb:', err, data);
 			});
 			break;
 		case 'text':
 		default:
-			botly.send({
+			botly.sendText({
 				id: prev.sender,
-				text: data.text
+				text: chzw(data.text)
 			}, (err, data) => {
-				cnosole.log('text send cb:', err, data);
+				console.log('text send cb:', err, data);
 			});
 	}
 };

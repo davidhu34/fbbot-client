@@ -254,11 +254,17 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 				}, (err, data) => { console.log("reviews button cb:", err, data) })
 			})
 			break
+		case 'hsr':
+			botly.sendText({
+				id: prev.sender,
+				text: chzw(data.hsr)
+			}, (err, data) => { console.log('hsr table send cb:', err, data) })
+			break
 		case 'text':
 		default:
-			botly.send({
+			botly.sendText({
 				id: prev.sender,
-				message:{text: data.text}
+				text: chzw(data.text)
 			}, (err, data) => { console.log('text send cb:', err, data) })
 	}
 }
