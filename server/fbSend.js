@@ -260,6 +260,17 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 				text: chzw(data.hsr)
 			}, (err, data) => { console.log('hsr table send cb:', err, data) })
 			break
+		case 'websearch':
+			botly.sendButtons({
+				id: prev.sender,
+				text: data.result
+				buttons: [{
+					type: 'web_url',
+					url: data.link,
+					title: 'wiki'
+				}]
+			})
+			break
 		case 'text':
 		default:
 			botly.sendText({
