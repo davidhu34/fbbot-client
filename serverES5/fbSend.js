@@ -3,6 +3,7 @@ const opencc = require('opencc');
 const occ = new opencc('s2twp.json');
 const type_zh_tw = require('./place_type');
 const stockname = require('./stockname.json');
+const currencySymbols = require('./currencySymbols.json');
 //const stockName = JSON.parse(stockname)
 const chzw = str => occ.convertSync(str);
 
@@ -24,6 +25,29 @@ module.exports = botly => payload => {
 	const data = payload.data;
 	const elements = [];
 	switch (type) {
+		case 'websearch':
+			console.log('wiki data:', data);
+			if(data.link){
+				botly.sendButtons({
+					id: prev.sender,
+					text: chzw(data.result),
+					buttons: [{
+						type: 'web_url',
+						url: data.link,
+						title: 'wiki'
+					}]
+				}, (err, data) => {
+					console.log('websearch send:', err, data);
+				})
+			} else {
+				botly.sendText({
+					id: prev.sender,
+					text: chzw(data.result)
+				}, (err, data) => {
+					console.log('websearch send:', err, data);
+				})
+			}
+			break;
 		case 'news':
 			data.news.map(n => {
 				if (elements.length < 4) {
@@ -76,8 +100,14 @@ module.exports = botly => payload => {
 				aspectRatio: 'square',
 				elements: elements
 			}, (err, data) => {
-				console.log('weather cb:', err, data);
+				console.log('weather gen cb:', err, data);
 			});
+			botly.sendText({
+				id: prev.sender,
+				text: w.suggestion
+			}, (err, data) => {
+				console.log('weather sug cb:', err, data);
+			})
 			break;
 		case 'stock':
 			const stockCode = data.stock.split(':');
@@ -273,6 +303,7 @@ module.exports = botly => payload => {
 			break;
 		case 'text':
 		default:
+		console.log('text');
 			botly.sendText({
 				id: prev.sender,
 				text: chzw(data.text)

@@ -72,7 +72,11 @@ module.exports = (botly) => (payload) => { // source: douban movies v2 api
 				id: prev.sender,
 				aspectRatio: 'square',
 				elements: elements
-			}, (err, data) => { console.log('weather cb:', err, data) })
+			}, (err, data) => { console.log('weather gen cb:', err, data) })
+			botly.sendText({
+				id: prev.sender,
+				text: w.suggestion,
+			}, (err, data) => { console.log('weather sug cb:', err, data) })
 			break
 		case 'stock':
 			const stockCode = data.stock.split(':')
